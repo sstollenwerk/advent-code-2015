@@ -14,10 +14,6 @@ import qualified Data.Set as Set
 
 data Command = Off | On | Toggle deriving (Eq,Ord,Enum,Show)
 
-
-
--- data Position = Complex Int deriving (Eq, Show)
-
 type Position = (Int, Int)
 
 type Lights = Map  Position Int
@@ -55,9 +51,10 @@ switch p (Instruction On a b) = Set.union  (vals a b) p
 switch p (Instruction Toggle a b) = Set.union (Set.difference  p xs ) (Set.difference  xs p )
     where xs = (vals a b)
 
-com Off = (max 0) . pred
-com On = (+1)
-com Toggle = (+2)
+com :: Command -> Int
+com Off = (-1)
+com On = 1
+com Toggle = 2
 
 allCommands :: [Instruction] -> [Inst]
 allCommands =  concat . (map asComm )
@@ -65,18 +62,16 @@ allCommands =  concat . (map asComm )
 asComm :: Instruction -> [Inst]
 asComm (Instruction k a b) = [(Inst k (x , y) ) | x <- ([fst a .. fst b] ) , y <- [snd  a .. snd  b] ]
 
-switch2 :: Lights -> Inst -> Lights
-switch2 m (Inst k a) = Map.insert a (com k v) m
-    where v = Map.findWithDefault 0 a m
-
-
+switch2 :: Lights -> Instruction -> Lights
+switch2 m (Instruction k a b) = Map.map (max 0) res
+    where res = Map.unionWith (+) m $ Map.fromList [ (x, com k )  | x <- Set.toList (vals a b)  ]
 
 
 part1 :: [Instruction] -> Int
 part1 = length .  (foldl' switch (Set.empty)  )
 
 part2 :: [Instruction] -> Int
-part2 xs = sum $ Map.elems  $  (foldl' switch2 (Map.empty)   (allCommands xs) )
+part2 xs = sum $ Map.elems  $  foldl' switch2 (Map.empty)   xs
 
 
 main :: IO ()
