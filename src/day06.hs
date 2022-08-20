@@ -2,6 +2,10 @@ module Main where
 
 import Data.Complex
 import Data.List.Split (splitOn)
+import Data.List( foldl')
+
+import Data.Map (Map)
+import qualified Data.Map as Map
 
 
 import Data.Set (Set)
@@ -16,10 +20,17 @@ data Command = Off | On | Toggle deriving (Eq,Ord,Enum,Show)
 
 type Position = (Int, Int)
 
+type Lights = Map  Position Int
+
 data Instruction = Instruction {
     c :: Command,
     a :: Position,
     b :: Position
+    } deriving (Show)
+
+data Inst = Inst {
+    d :: Command,
+    e :: Position
     } deriving (Show)
 
 asPos :: String -> Position
@@ -44,8 +55,29 @@ switch p (Instruction On a b) = Set.union  (vals a b) p
 switch p (Instruction Toggle a b) = Set.union (Set.difference  p xs ) (Set.difference  xs p )
     where xs = (vals a b)
 
+com Off = (max 0) . pred
+com On = (+1)
+com Toggle = (+2)
+
+allCommands :: [Instruction] -> [Inst]
+allCommands =  concat . (map asComm )
+
+asComm :: Instruction -> [Inst]
+asComm (Instruction k a b) = [(Inst k (x , y) ) | x <- ([fst a .. fst b] ) , y <- [snd  a .. snd  b] ]
+
+switch2 :: Lights -> Inst -> Lights
+switch2 m (Inst k a) = Map.insert a (com k v) m
+    where v = Map.findWithDefault 0 a m
+
+
+
+
 part1 :: [Instruction] -> Int
-part1 = length .  (foldl switch (Set.empty)  )
+part1 = length .  (foldl' switch (Set.empty)  )
+
+part2 :: [Instruction] -> Int
+part2 xs = sum $ Map.elems  $  (foldl' switch2 (Map.empty)   (allCommands xs) )
+
 
 main :: IO ()
 main = do 
@@ -55,4 +87,4 @@ main = do
           print $ vals (0,0) (10,0)
           putStrLn ( "p1: " ++ (show $ part1 [(Instruction Toggle (0,0) (999,0) )] ) ) 
           putStrLn ( "p1: " ++ (show $ part1 parts ) )
-          --putStrLn ( "p2: " ++ (show $ part2 parts ) )
+          putStrLn ( "p2: " ++ (show $ part2 parts ) )
