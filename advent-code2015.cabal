@@ -1,5 +1,5 @@
 cabal-version:      2.4
-name:               advent-code-2015
+name:               advent-code2015
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
@@ -21,16 +21,18 @@ maintainer:         sstollenwerk@yahoo.co.nz
 -- category:
 extra-source-files: CHANGELOG.md
 
-executable tmp
+executable advent-code2015
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    -- other-modules: Day07.hs,
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:    base ^>=4.14.3.0,
                       split ^>=0.2.3.5,
-                      pureMD5  ^>=2.1.4,
+                      pureMD5 ^>=2.1.4,
+                      memoize ^>=1.1.1,
+                      containers ^>=0.6.5.1,
     hs-source-dirs:   app
     default-language: Haskell2010

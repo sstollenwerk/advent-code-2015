@@ -2,3 +2,4 @@
 *.exe
 *.pdb
 /data/*.txt
+/dist-newstyle

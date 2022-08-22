@@ -24,10 +24,6 @@ data Instruction = Instruction {
     b :: Position
     } deriving (Show)
 
-data Inst = Inst {
-    d :: Command,
-    e :: Position
-    } deriving (Show)
 
 asPos :: String -> Position
 asPos s =  (xs!!0 , xs!! 1)
@@ -46,21 +42,22 @@ parse s
 vals a b = Set.fromList  [(x , y) | x <- ([fst a .. fst b] ) , y <- [snd  a .. snd  b] ]
 
 switch :: Set Position -> Instruction -> Set Position
-switch p (Instruction Off a b) = Set.difference p (vals a b)
-switch p (Instruction On a b) = Set.union  (vals a b) p
-switch p (Instruction Toggle a b) = Set.union (Set.difference  p xs ) (Set.difference  xs p )
-    where xs = (vals a b)
+switch p (Instruction i a b) = (group i) p (vals a b)
+
+
+group Off = Set.difference
+group On = Set.union
+group Toggle = symmetricDifference
+
+symmetricDifference :: Ord a => Set a -> Set a -> Set a
+symmetricDifference a b = Set.union (Set.difference  a b ) (Set.difference  b a )
+
 
 com :: Command -> Int
 com Off = (-1)
 com On = 1
 com Toggle = 2
 
-allCommands :: [Instruction] -> [Inst]
-allCommands =  concat . (map asComm )
-
-asComm :: Instruction -> [Inst]
-asComm (Instruction k a b) = [(Inst k (x , y) ) | x <- ([fst a .. fst b] ) , y <- [snd  a .. snd  b] ]
 
 switch2 :: Lights -> Instruction -> Lights
 switch2 m (Instruction k a b) = Map.map (max 0) res
@@ -78,8 +75,5 @@ main :: IO ()
 main = do 
           file <- readFile ("../data/06.txt")
           let parts = map parse $ lines file
-          --mapM_  print parts
-          print $ vals (0,0) (10,0)
-          putStrLn ( "p1: " ++ (show $ part1 [(Instruction Toggle (0,0) (999,0) )] ) ) 
           putStrLn ( "p1: " ++ (show $ part1 parts ) )
           putStrLn ( "p2: " ++ (show $ part2 parts ) )
