@@ -25,7 +25,7 @@ executable advent-code2015
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules: Day07.hs,
+    other-modules: Day09
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
