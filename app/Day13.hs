@@ -41,7 +41,7 @@ parseRow s = ( ( (xs !! 0), (last xs) ), (  read (xs!!3) * (asDel (xs!!2)) )  )
 
 
 happy :: Happiness -> [Name] -> Amt
-happy h xs = sum  . (map fromJust) $ map (`Map.lookup` h) groups
+happy h xs = sum  $ map (flip (Map.findWithDefault 0)  h) groups
     where
         ys = (last xs): xs
         p1 = pairwise ys
@@ -50,6 +50,8 @@ happy h xs = sum  . (map fromJust) $ map (`Map.lookup` h) groups
 names :: Happiness -> [Name]
 names = sort . Set.toList  .  (Set.map  fst) . Map.keysSet 
 
+
+
 part1 :: String -> Amt
 part1 words = maximum $ map  (happy h) (permutations (names h) )
     where h = Map.fromList  $ map parseRow $ lines words
@@ -57,4 +59,5 @@ part1 words = maximum $ map  (happy h) (permutations (names h) )
 
 
 part2 :: String -> Amt
-part2 w = 0
+part2 words = maximum $ map  (happy h) (permutations ("ME" : names h) )
+    where h = Map.fromList  $ map parseRow $ lines words
