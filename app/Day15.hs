@@ -1,13 +1,12 @@
 module Day15 where
 
-import Data.Map (Map)
-import qualified Data.Map as Map
+import           Data.Map        (Map)
+import qualified Data.Map        as Map
 
-import Data.List.Split (splitOn)
+import           Data.List.Split (splitOn)
 
+import           Data.Maybe      (fromJust)
 
--- import Boltzmann.Data.Common (partitions)
--- can't install - missing c packages
 
 type Ingredient = Map String Int
 
@@ -19,24 +18,18 @@ asIngr s = (d, read amt)
 
 parseRow :: String -> Ingredient
 parseRow s = Map.fromList $ map asIngr groups
-    where 
-        info = (splitOn ": " s) !!1 
+    where
+        info = (splitOn ": " s) !!1
         groups = splitOn ", " info
 
 score1 :: Ingredient -> Int
-score1 =  (foldr1 (*) ) . ( map (max 0) ) .  Map.elems . (Map.delete "calories" )
+score1 =  (foldl1 (*) ) . ( map (max 0) ) .  Map.elems . (Map.delete "calories" )
 
 mix :: Ingredient -> Ingredient -> Ingredient
 mix = Map.unionWith (+)
+-- treat a combination of ingredients as a single Ingredient
 
 
--- 4 ingedients = 100^4 =  100 billion?
--- nope: tetrahedral numbers - 'only' 176851
---partitions' :: Int -> Int -> [[Int]]
---partitions' 0 0 = [[]]
---partitions' 0 n = error "bad"
---partitions' k n =  [ i:p |    i <-  [0..k],  p <- (partitions (k-i) (n-1) ) ] 
--- results in stack overflow - not sure why
 
 -- based on boltzmann-samplers-0.1.1.0  Boltzmann.Data.Common.html - partitions
 -- modified so gets total that == k instead of <= k
@@ -58,6 +51,8 @@ allPosses totalTake ingrs  = map (foldl1 mix) groups
         allParts = partitions totalTake (length ingrs)
         groups = map (combine ingrs) allParts
 
+valid :: Ingredient -> Bool
+valid = (500==) . fromJust . (Map.lookup "calories" )
 
 part1 :: String -> Int
 part1 s = maximum $ map score1 $ allPosses 100 ingrs
@@ -65,4 +60,4 @@ part1 s = maximum $ map score1 $ allPosses 100 ingrs
         ingrs = map parseRow (lines s)
 
 part2 :: String -> Int
-part2 s = 0
+part2 = maximum . (map score1) . (filter valid) . (allPosses 100)  . ( map parseRow) . lines
