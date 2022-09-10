@@ -52,7 +52,7 @@ maybeEq2 a b  = and $ zipWith ($)  (getVals a sames)  (getVals b sames)
 
 
 part1 :: String -> Int
-part1 = (Map.findWithDefault (-1) "Sue" ) . head .  filter (  maybeEq baseSue  ) . (map parseRow ) . lines
+part1 = (fromJust . Map.lookup "Sue" ) . head .  filter (  maybeEq baseSue  ) . (map parseRow ) . lines
 
 part2 :: String -> Int 
-part2 = (Map.findWithDefault (-1) "Sue" ) . head .  filter (  maybeEq2 baseSue2  ) . (map parseRow ) . lines
+part2 = (fromJust . Map.lookup "Sue" ) . head .  filter (  maybeEq2 baseSue2  ) . (map parseRow ) . lines
