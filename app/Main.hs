@@ -11,7 +11,7 @@ main = do
           --let parts = lines file
           putStrLn ( "p1: " ++ (show $ part1 file ) )
 
-          --putStrLn ( "p2: " ++ (show $ part2 file ) )
+          putStrLn ( "p2: " ++ (show $ part2 file ) )
 
 
 

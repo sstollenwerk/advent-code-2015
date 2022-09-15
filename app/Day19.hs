@@ -1,14 +1,21 @@
 module Day19 where
 
 
-import Data.List.Split (splitOn, splitPlacesBlanks )
 
 import Data.List (intercalate)
 
-import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Tuple (swap)
+
+import Data.List.Split (splitOn, splitPlacesBlanks )
+
+import Data.Maybe (catMaybes, fromJust)
+
+import           Data.Set        (Set)
+import qualified Data.Set        as Set
 
 import Debug.Trace (traceShowId)
+
+
 
 
 type Replaces = (String, String)
@@ -31,7 +38,28 @@ parts s = [splitPlacesBlanks [i,n] s | i <- [1..(n-1)]]
     where
         n = length s
 
+allReplacements ::  [Replaces] -> String -> Set String
+allReplacements  repls k = Set.unions $ map (Set.fromList . (replacements k)  ) repls
 
+reduce :: [Replaces] ->  Set String -> (String, Int)
+reduce repls posses = (res, (length vals) - 1   )
+    where 
+        step :: Set String -> Set String
+        step = Set.unions . (Set.map (allReplacements repls) )
+        vals = takeWhile (not . Set.null  ) $  iterate step posses
+        res = Set.elemAt 0  (last vals)
+
+steps :: [Replaces] ->   [String] -> Int
+steps repls vals = go ( reverse vals)
+        -- apparently only works with popright not popleft.
+    where 
+        red x = reduce repls (Set.singleton  x)
+        go :: [String] -> Int
+        go [] = 0
+        go (x:[]) =  snd $ traceShowId $ red x
+        go (x:y:xs) = amt + go ((y++a):xs)
+            where
+                (a,amt) = traceShowId $ red  (traceShowId x)
 
 parse :: String -> ([Replaces], String)
 parse s = ( (map asRepl repl), mol )
@@ -41,8 +69,13 @@ parse s = ( (map asRepl repl), mol )
         repl = filter ( (not ) . null ) $ init parts
 
 
-part1 :: String -> Int
-part1 s = length $ Set.unions $ map (Set.fromList . (replacements k)  ) repls
-    where (repls, k) = traceShowId $ parse s
 
-part2 s = 0
+part1 :: String -> Int
+part1 = length . (uncurry  allReplacements) . parse
+
+part2 :: String -> Int
+part2 s = steps repls segments
+    where 
+        (repls', k) =  parse s
+        repls = map swap repls'
+        segments = map (:[]) k
