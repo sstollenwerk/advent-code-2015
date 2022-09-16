@@ -2,6 +2,10 @@ module Day20 where
 
 import Data.List (sort)
 
+import           Data.Map.Lazy        (Map)
+import qualified Data.Map.Lazy as Map
+
+
 presentsBruteForce :: Int -> Int
 presentsBruteForce = (10*) . sigma
 -- solution must be in A002093		Highly abundant numbers: numbers k such that sigma(k) > sigma(m) for all m < k.
@@ -12,6 +16,7 @@ presentsBruteForce = (10*) . sigma
 -- https://stackoverflow.com/questions/9986404/how-can-i-do-an-https-request-in-haskell 
 -- https://stackoverflow.com/questions/37571939/data-bytestring-lazy-internal-bytestring-to-string
 -- 
+
 
 
 
@@ -30,17 +35,29 @@ sigma :: Int -> Int
 sigma = sum . factors
 
 
-presents2BruteForce = (11*) . sum . (take 50) . orderedFactors
+--presents2BruteForce = (11*) . sum . (take 50) . orderedFactors
+-- nope, that's not right
 
-orderedFactors = sort . factors
--- write more efficient implementation
+--orderedFactors = sort . factors
 
---part1 :: String -> Int
---part1 s = head $ filter ( (>=(read s) ) . presentsBruteForce) [1..]
-part1 s = 0
+
+elf :: Int -> Map Int Int
+elf n = Map.fromList [ (i, n*11) | i<- houses  ]
+    where 
+        houses = map (*n) [1..50]
+
+part1 :: String -> Int
+part1 s = head $ filter ( (>=(read s) ) . presentsBruteForce) [1..]
 
 part1Outside :: String -> String -> Int
 part1Outside s oeis = head $ filter ( (>=(read s) ) . presentsBruteForce) posses
     where posses = map (read . (!!1) . words ) $ lines  oeis
 
-part2 s = head $ filter ( (>=(read s) ) . presents2BruteForce) [1..]
+elvesUpTo n = Map.unionsWith (+) ( map elf [1..n]  )
+
+part2 s = fst $ Map.findMin $ Map.filter (>= n ) allElves
+    where 
+        n = read s
+        allElves = elvesUpTo (div n 10)
+        -- elf (div n 10) will deliver more than n presents to a house so can stop by this point
+        -- is it guaranteed that first house seen is smallest? No idea. Not assuming so.
