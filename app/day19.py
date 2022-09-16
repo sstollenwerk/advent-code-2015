@@ -89,6 +89,8 @@ def find_best_path(start:str, end:str, transitions:list[Replaces] ) -> int:
 
 def flatten(c):return (a for b in c for a in b)
 
+def chunks_(n, xs):return [xs[i:i+n] for i in range(0,len(xs), n)]
+
 def find_reduction(rx, a):
     posses = {a}
     i = 0
@@ -111,15 +113,19 @@ def part2(s):
     a,b = list(map(set,map(flatten,  zip(*rx))))
     keep = (a-b)
     # items that aren't in any keys
-    chunks = [ ''.join(v) for k,v in groupby(s, key = lambda x: x in keep)]
+    chunks = [c+'r' for c in s.split('r')]
+    chunks[-1] = chunks[-1][:-1] 
+    # remove r from last
+    print(chunks)
     total = 0
     while chunks:
-        a = chunks.pop()
+        a = chunks.pop(0)
         res, part_steps = find_reduction(rx, a)
         total += part_steps
         if chunks:
-            b = chunks.pop()
-            chunks.append(b+res)
+            b = chunks.pop(0)
+            chunks = [res+b] + chunks
+        print(res, part_steps)
     return total
 
 

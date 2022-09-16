@@ -2,13 +2,15 @@ module Day19 where
 
 
 
-import Data.List (intercalate)
+import Data.List (intercalate, maximumBy)
 
 import Data.Tuple (swap)
 
-import Data.List.Split (splitOn, splitPlacesBlanks )
+import Data.List.Split (splitOn, splitPlacesBlanks, split, keepDelimsR,onSublist  )
 
 import Data.Maybe (catMaybes, fromJust)
+
+import Data.Function ( on )
 
 import           Data.Set        (Set)
 import qualified Data.Set        as Set
@@ -50,14 +52,14 @@ reduce repls posses = (res, (length vals) - 1   )
         res = Set.elemAt 0  (last vals)
 
 steps :: [Replaces] ->   [String] -> Int
-steps repls vals = go ( reverse vals)
+steps repls vals = go (  vals)
         -- apparently only works with popright not popleft.
     where 
         red x = reduce repls (Set.singleton  x)
         go :: [String] -> Int
         go [] = 0
         go (x:[]) =  snd $ traceShowId $ red x
-        go (x:y:xs) = amt + go ((y++a):xs)
+        go (x:y:xs) = amt + go ((a++y):xs)
             where
                 (a,amt) = traceShowId $ red  (traceShowId x)
 
@@ -73,9 +75,16 @@ parse s = ( (map asRepl repl), mol )
 part1 :: String -> Int
 part1 = length . (uncurry  allReplacements) . parse
 
+
+
+
 part2 :: String -> Int
 part2 s = steps repls segments
     where 
         (repls', k) =  parse s
         repls = map swap repls'
-        segments = map (:[]) k
+        suffix  = last   (maximumBy (compare `on` length) (map fst repls))
+
+        segments = traceShowId $ split (keepDelimsR $ onSublist   "Ar") k
+        -- in input I have "r" is suffix of all long substitutions but "r" doesn't appear in subtitutions
+
