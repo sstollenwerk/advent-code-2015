@@ -35,34 +35,27 @@ rings = [ (Equipment "Damage +1" 25 1 0) , (Equipment "Damage +2" 50 2 0),  (Equ
 
 -- brute force = 5 * 6 *  (6c0 + 6c1 + 6c2) = 5*6*22 = 660 = small enough.
 
+
+combinations k ns = filter ((k==).length) $ subsequences ns
+-- from https://stackoverflow.com/a/52605612
+
+
 w = (combinations 1 weapons)
 a = (combinations 0 armours) ++ (combinations 1 armours)
 r = (combinations 0 rings) ++ (combinations 1 rings) ++ (combinations 2 rings) 
 posses = [ (foldl1 combine)    (w_++a_++r_) |  w_ <- w, a_ <- a, r_ <- r]
 
 wins :: Character -> Character -> Bool
-wins char boss = cTurn <= bTurn && (isJust cTurn)
--- just x > Nothing
-    where 
-        cTurn =  turnsToKill char boss
-        bTurn =  turnsToKill boss char
+wins (Character hp1 d1 arm1) (Character hp2 d2 arm2)
+    | hp1 <= 0 = False
+    | otherwise = not $ wins (Character (hp2 - (max 0 (d1-arm2)  ) ) d2 arm2) (Character hp1 d1 arm1)
 
 equipWins :: Int -> Character -> Equipment -> Bool
 equipWins hp boss (Equipment _ _ dam arm) = wins (Character hp dam arm ) boss
 
-turnsToKill :: Character -> Character -> Maybe Int
-turnsToKill (Character _ dam _) (Character hp _ arm)
-    | dam <= arm = Nothing
-    | otherwise  = Just turns
-    where 
-        (t, p) = divMod hp (dam - arm)
-        turns = t + (signum p)
-
-combinations k ns = filter ((k==).length) $ subsequences ns
--- from https://stackoverflow.com/a/52605612
 
 part1 :: String -> Int
 part1 s = minimum $ map cost $ filter (equipWins 100 (toCharacter s) ) posses
 
 part2 :: String -> Int
-part2 s = undefined
+part2 s = maximum $ map cost  $ filter (not . ( equipWins 100 (toCharacter s) ) ) posses
