@@ -48,7 +48,7 @@ posses = [ (foldl1 combine)    (w_++a_++r_) |  w_ <- w, a_ <- a, r_ <- r]
 wins :: Character -> Character -> Bool
 wins (Character hp1 d1 arm1) (Character hp2 d2 arm2)
     | hp1 <= 0 = False
-    | otherwise = not $ wins (Character (hp2 - (max 0 (d1-arm2)  ) ) d2 arm2) (Character hp1 d1 arm1)
+    | otherwise = not $ wins (Character (hp2 - (max 1 (d1-arm2)  ) ) d2 arm2) (Character hp1 d1 arm1)
 
 equipWins :: Int -> Character -> Equipment -> Bool
 equipWins hp boss (Equipment _ _ dam arm) = wins (Character hp dam arm ) boss
